@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Optimasi — Mobil & Truk</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--panel:#111827;--p2:#1a2235;--acc:#00d4aa;--acc2:#ff6b35;--acc3:#a78bfa;--gold:#fbbf24;--txt:#e2e8f0;--muted:#64748b;--bdr:#1e293b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+.hdr{padding:2.5rem 2rem 1.5rem;text-align:center;position:relative;background:linear-gradient(135deg,#0a0e1a,#0d1929,#0a0e1a);border-bottom:1px solid var(--bdr);}
+.hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(0,212,170,.08),transparent 70%);pointer-events:none;}
+.badge{display:inline-block;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.3);color:var(--acc);font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;padding:.28rem .9rem;border-radius:999px;margin-bottom:.9rem;}
+h1{font-size:clamp(1.5rem,4vw,2.4rem);font-weight:800;line-height:1.1;margin-bottom:.4rem;}h1 span{color:var(--acc);}
+.sub{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);}
+.tabs{display:flex;justify-content:center;gap:.35rem;padding:1.1rem 1rem 0;flex-wrap:wrap;}
+.tab{font-family:'Syne',sans-serif;font-size:.73rem;font-weight:600;padding:.5rem 1.1rem;border-radius:8px;border:1px solid var(--bdr);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .18s;}
+.tab:hover{color:var(--txt);border-color:var(--acc);}
+.tab.active{background:var(--acc);color:#0a0e1a;border-color:var(--acc);font-weight:700;}
+.wrap{max-width:1060px;margin:0 auto;padding:1.7rem 1.3rem 4rem;}
+.sec{display:none;}.sec.active{display:block;}
+.card{background:var(--panel);border:1px solid var(--bdr);border-radius:12px;padding:1.3rem;margin-bottom:1.3rem;}
+.ctit{font-size:.9rem;font-weight:700;color:var(--acc);margin-bottom:.85rem;display:flex;align-items:center;gap:.45rem;}
+.num{width:21px;height:21px;background:rgba(0,212,170,.15);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;color:var(--acc);flex-shrink:0;}
+.eb{background:rgba(0,212,170,.04);border:1px solid rgba(0,212,170,.2);border-radius:8px;padding:.85rem 1rem;font-size:.8rem;line-height:1.7;color:var(--txt);margin-bottom:.85rem;}
+.eb strong{color:var(--acc);}.em{color:var(--gold);font-family:'JetBrains Mono',monospace;}
+.eb.gold{background:rgba(251,191,36,.04);border-color:rgba(251,191,36,.25);}
+.eb.gold strong{color:var(--gold);}
+.eb.red{background:rgba(255,107,53,.04);border-color:rgba(255,107,53,.25);}
+.eb.purple{background:rgba(167,139,250,.04);border-color:rgba(167,139,250,.25); color:var(--muted); font-size:0.75rem;}
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem;}
+.tbl th{background:var(--p2);padding:.5rem .85rem;text-align:left;font-weight:600;color:var(--muted);font-size:.67rem;letter-spacing:.05em;text-transform:uppercase;}
+.tbl td{padding:.5rem .85rem;border-top:1px solid var(--bdr);font-family:'JetBrains Mono',monospace;font-size:.76rem;}
+.cc{color:var(--acc);font-weight:700;}.tc{color:var(--acc2);font-weight:700;}
+.fbox{background:var(--p2);border:1px solid var(--bdr);border-radius:8px;padding:.9rem 1.1rem;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.9;}
+.fbox .fl{font-family:'Syne',sans-serif;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+.fbox .fo{color:var(--gold);font-weight:700;font-size:.92rem;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+@media(max-width:540px){.g2{grid-template-columns:1fr;}}
+.btn{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;padding:.6rem 1.2rem;border-radius:8px;border:none;cursor:pointer;transition:all .18s;}
+.btnp{background:var(--acc);color:#0a0e1a;}.btnp:hover{background:#00bfa0;transform:translateY(-1px);}
+.btns{background:var(--p2);color:var(--txt);border:1px solid var(--bdr);}.btns:hover{border-color:var(--acc);}
+.bgrp{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.1rem;}
+.prog{height:4px;background:var(--bdr);border-radius:999px;margin-bottom:1.1rem;overflow:hidden;}
+.progf{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc3));border-radius:999px;transition:width .4s ease;}
+.sstep{background:var(--p2);border:1px solid var(--bdr);border-radius:10px;padding:1rem;margin-bottom:.7rem;position:relative;overflow:hidden;}
+.sstep::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);border-radius:3px 0 0 3px;}
+.sstep.off::before{background:var(--bdr);}
+.shdr{font-size:.78rem;font-weight:700;margin-bottom:.45rem;display:flex;align-items:center;gap:.55rem;}
+.snum2{background:rgba(0,212,170,.15);color:var(--acc);width:19px;height:19px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:700;}
+.sstep.off .snum2{background:var(--bdr);color:var(--muted);}
+.sbody{font-size:.76rem;color:var(--muted);line-height:1.7;font-family:'JetBrains Mono',monospace;}
+.sbody .hl{color:var(--gold);}.sbody .cr{color:var(--acc2);}.sbody .pr{color:var(--acc);font-weight:700;}
+.gwrap{background:var(--p2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;}
+.gleg{display:flex;gap:1.1rem;padding:.8rem 1.1rem;flex-wrap:wrap;border-top:1px solid var(--bdr);}
+.gli{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.gld{width:10px;height:10px;border-radius:2px;}
+canvas{display:block;max-width:100%;}
+.mctrl{display:flex;gap:.9rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.1rem;}
+.slg{flex:1;min-width:180px;}
+.sll{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem;font-family:'JetBrains Mono',monospace;}
+.slv{color:var(--acc);font-weight:700;}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:var(--bdr);border-radius:999px;outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--acc);border-radius:50%;cursor:pointer;}
+.mcst{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.7rem;}
+.stb{background:var(--p2);border:1px solid var(--bdr);border-radius:10px;padding:.85rem;text-align:center;}
+.stv{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--acc);margin-bottom:.2rem;}
+.stl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.mclog{background:var(--p2);border:1px solid var(--bdr);border-radius:8px;padding:.85rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);height:150px;overflow-y:auto;line-height:1.8;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}
+@media(max-width:540px){.sg{grid-template-columns:1fr;}}
+.ssg{background:var(--p2);border:1px solid var(--bdr);border-radius:10px;padding:.95rem;}
+.ssg .lbl{font-size:.78rem;font-weight:600;margin-bottom:.22rem;}
+.ssg .sub{font-size:.67rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:.65rem;}
+.sres{background:var(--p2);border:1px solid rgba(0,212,170,.25);border-radius:10px;padding:1.2rem;text-align:center;margin-bottom:.9rem;}
+.sres .big{font-size:1.85rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--gold);}
+.sres .det{font-size:.75rem;color:var(--muted);margin-top:.35rem;font-family:'JetBrains Mono',monospace;}
+.ci{font-size:.7rem;font-family:'JetBrains Mono',monospace;margin-top:.28rem;}
+.cup{color:#34d399;}.cdn{color:#f87171;}.csm{color:var(--muted);}
+/* ---- JADWAL NEW ---- */
+.flowdiag{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:1rem 0;}
+.fdnode{background:var(--p2);border:2px solid var(--bdr);border-radius:10px;padding:.65rem .9rem;text-align:center;min-width:90px;}
+.fdnode.mesin{border-color:var(--acc2);background:rgba(255,107,53,.08);}
+.fdnode.ref{border-color:var(--acc);background:rgba(0,212,170,.08);}
+.fdnode.end{border-color:var(--gold);background:rgba(251,191,36,.08);}
+.fdnode .ftit2{font-size:.67rem;font-weight:700;margin-bottom:.18rem;}
+.fdnode .fdet{font-size:.6rem;color:var(--muted);font-family:'JetBrains Mono',monospace;line-height:1.5;}
+.fdarr{font-size:1.1rem;color:var(--muted);padding:0 .35rem;align-self:center;}
+/* MODE TOGGLE */
+.mode-toggle{display:flex;gap:.5rem;margin-bottom:1rem;background:var(--p2);border-radius:10px;padding:.35rem;border:1px solid var(--bdr);}
+.mode-btn{flex:1;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:600;padding:.55rem .8rem;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;text-align:center;}
+.mode-btn.active{background:var(--acc);color:#0a0e1a;}
+/* BIG DISPLAY */
+.big-display{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;margin-bottom:1.1rem;}
+@media(max-width:600px){.big-display{grid-template-columns:1fr;}}
+.big-stat{background:var(--p2);border-radius:10px;padding:1.1rem;text-align:center;border:2px solid var(--bdr);transition:border-color .3s;}
+.big-stat .bval{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;margin-bottom:.25rem;}
+.big-stat .blbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.big-stat.highlight{border-color:var(--gold);background:rgba(251,191,36,.06);}
+/* RESULT BOX */
+.result-hero{background:var(--p2);border:2px solid rgba(0,212,170,.35);border-radius:12px;padding:1.4rem;text-align:center;margin-bottom:1.1rem;position:relative;overflow:hidden;}
+.result-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,212,170,.06),transparent 70%);pointer-events:none;}
+.result-hero .rh-tag{font-size:.62rem;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem;}
+.result-hero .rh-profit{font-size:2.5rem;font-family:'JetBrains Mono',monospace;font-weight:800;color:var(--gold);margin-bottom:.4rem;}
+.result-hero .rh-detail{font-size:.78rem;font-family:'JetBrains Mono',monospace;color:var(--txt);line-height:1.8;}
+.rh-formula{font-size:.8rem;font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,.3);border-radius:6px;padding:.6rem 1rem;margin-top:.7rem;display:inline-block;color:var(--gold);}
+/* FEASIBILITY */
+.feas-bar{height:8px;background:var(--bdr);border-radius:999px;overflow:hidden;margin-bottom:.35rem;}
+.feas-fill{height:100%;border-radius:999px;transition:width .4s,background .3s;}
+/* SMGRID */
+.smg{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:.65rem;}
+.smc{background:var(--p2);border:1px solid var(--bdr);border-radius:10px;padding:.8rem;text-align:center;}
+.smc .sv{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;margin-bottom:.17rem;}
+.smc .sl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;line-height:1.4;}
+/* SCENARIO CHIPS */
+.presets{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.preset-chip{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:.32rem .75rem;border-radius:999px;border:1px solid var(--bdr);background:var(--p2);color:var(--muted);cursor:pointer;transition:all .18s;}
+.preset-chip:hover,.preset-chip.active{border-color:var(--acc);color:var(--acc);background:rgba(0,212,170,.1);}
+/* alert */
+.alert{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.35);border-radius:8px;padding:.7rem 1rem;font-size:.76rem;color:var(--acc2);margin-bottom:.8rem;display:none;}
+.alert.show{display:block;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--panel);}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px;}
+@media(max-width:480px){.hdr{padding:1.8rem .9rem 1.1rem;}.wrap{padding:1.1rem .8rem 3rem;}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="badge">Operations Research · Flow Shop Scheduling</div>
+  <h1>Optimasi Keuntungan<br><span>Mobil &amp; Truk</span></h1>
+  <p class="sub">Model LP · Grafik · Simpleks · Monte Carlo · Sensitivitas · Jadwal Produksi</p>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('model',this)">📐 Model</button>
+  <button class="tab" onclick="showTab('grafik',this)">📊 Grafik</button>
+  <button class="tab" onclick="showTab('simpleks',this)">🔄 Simpleks</button>
+  <button class="tab" onclick="showTab('monte',this)">🎲 Monte Carlo</button>
+  <button class="tab" onclick="showTab('sensitif',this)">🎛️ Sensitivitas</button>
+  <button class="tab" onclick="showTab('jadwal',this)">📅 Jadwal Produksi</button>
+</div>
+<div class="wrap">
+
+<!-- MODEL -->
+<div id="tab-model" class="sec active">
+  <div class="card">
+    <div class="ctit"><div class="num">1</div>Deskripsi Masalah</div>
+    <div class="eb">Perusahaan memperbaiki <strong>mobil</strong> dan <strong>truk</strong> untuk dijual kembali. Setiap kendaraan <strong>wajib melewati dua bengkel secara berurutan</strong>: Mesin/Bodi dahulu, baru Refinishing/Cat. Tujuan: memaksimalkan total keuntungan.</div>
+    
+    <div class="eb purple">
+      <strong>⚠️ Catatan Asumsi Model (Real-world Limits):</strong><br>
+      • <strong>Integer Programming:</strong> Kendaraan adalah diskrit (tidak bisa diproduksi parsial/pecahan). <br>
+      • <strong>Setup Time:</strong> Model ini mengabaikan waktu persiapan mesin saat berpindah dari merakit mobil ke truk.<br>
+      • <strong>Kondisi Ideal:</strong> Jam operasional diasumsikan 100% efisien tanpa kendala tak terduga (kerusakan alat/keterlambatan).
+    </div>
+
+    <table class="tbl"><thead><tr><th>Parameter</th><th class="cc">🚗 Mobil (x)</th><th class="tc">🚛 Truk (y)</th><th>Kapasitas Total</th></tr></thead><tbody>
+    <tr><td>Jam Mesin/Bodi (Tahap 1)</td><td class="cc">50 jam</td><td class="tc">50 jam</td><td>2.500 jam</td></tr>
+    <tr><td>Jam Refinishing/Cat (Tahap 2)</td><td class="cc">40 jam</td><td class="tc">60 jam</td><td>2.400 jam</td></tr>
+    <tr><td>Keuntungan per unit</td><td class="cc">$3.000</td><td class="tc">$2.000</td><td>—</td></tr>
+    </tbody></table>
+  </div>
+  <div class="card">
+    <div class="ctit"><div class="num">2</div>Model Matematika</div>
+    <div class="g2">
+      <div class="fbox"><div class="fl">Fungsi Tujuan</div><div class="fo">Maks. Z = 3000x + 2000y</div></div>
+      <div class="fbox"><div class="fl">Kendala</div>
+        <div>50x + 50y ≤ 2500 (Mesin/Bodi)</div>
+        <div>40x + 60y ≤ 2400 (Refinishing)</div>
+        <div style="color:var(--acc3)">x ≥ 0, y ≥ 0</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><div class="num">3</div>Solusi Optimal: 50 Mobil, 0 Truk → $150.000</div>
+    <table class="tbl"><thead><tr><th>Titik Pojok</th><th style="text-align:center">x</th><th style="text-align:center">y</th><th style="text-align:center">Z</th><th style="text-align:center">Status</th></tr></thead><tbody>
+    <tr style="background:rgba(0,212,170,.07)"><td style="color:var(--acc);font-weight:700">A (50,0)</td><td style="text-align:center;color:var(--acc);font-weight:700">50</td><td style="text-align:center">0</td><td style="text-align:center;color:var(--gold);font-weight:700">$150.000 ⭐</td><td style="text-align:center;color:var(--acc);font-weight:700">OPTIMAL</td></tr>
+    <tr><td>B (30,20)</td><td style="text-align:center">30</td><td style="text-align:center">20</td><td style="text-align:center">$130.000</td><td style="text-align:center;color:var(--muted)">Layak</td></tr>
+    <tr><td>C (0,40)</td><td style="text-align:center">0</td><td style="text-align:center">40</td><td style="text-align:center">$80.000</td><td style="text-align:center;color:var(--muted)">Layak</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- GRAFIK -->
+<div id="tab-grafik" class="sec">
+  <div class="card">
+    <div class="ctit">📊 Daerah Feasibel &amp; Titik Pojok</div>
+    <div class="gwrap">
+      <canvas id="graphCanvas" width="680" height="430"></canvas>
+      <div class="gleg">
+        <div class="gli"><div class="gld" style="background:#ff6b35"></div>Kendala Mesin/Bodi</div>
+        <div class="gli"><div class="gld" style="background:#00d4aa"></div>Kendala Refinishing/Cat</div>
+        <div class="gli"><div class="gld" style="background:rgba(0,212,170,.2)"></div>Daerah Feasibel</div>
+        <div class="gli"><div class="gld" style="background:#fbbf24"></div>Titik Optimal</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMPLEKS -->
+<div id="tab-simpleks" class="sec">
+  <div class="card">
+    <div class="ctit">🔄 Metode Simpleks (Baseline)</div>
+    <div class="eb gold">💡 <strong>Catatan Akademis:</strong> Langkah-langkah Simpleks di bawah ini menjabarkan iterasi matematis untuk <strong>Parameter Baseline</strong> (Mobil $3000, Truk $2000). Jika Anda mengubah parameter di tab Sensitivitas, sistem akan memotong langkah ini dan langsung mengeksekusi solver matriks otomatis (Metode Titik Pojok) di latar belakang.</div>
+    <div class="bgrp">
+      <button class="btn btnp" onclick="sxNext()">▶ Berikutnya</button>
+      <button class="btn btns" onclick="sxReset()">↺ Ulang</button>
+      <button class="btn btns" onclick="sxAll()">⏩ Semua</button>
+    </div>
+    <div class="prog"><div class="progf" id="sxProg" style="width:0%"></div></div>
+    <div id="sxSteps"></div>
+  </div>
+</div>
+
+<!-- MONTE CARLO -->
+<div id="tab-monte" class="sec">
+  <div class="card"><div class="ctit">🎲 Monte Carlo (Uji Robustness)</div>
+    <div class="mctrl">
+      <div class="slg"><div class="sll">Iterasi: <span class="slv" id="mcIL">1000</span></div><input type="range" min="100" max="10000" step="100" value="1000" id="mcIS" oninput="document.getElementById('mcIL').textContent=this.value"></div>
+      <div class="slg"><div class="sll">Batas x: 0–<span class="slv" id="mcXL">70</span></div><input type="range" min="20" max="100" step="5" value="70" id="mcXS" oninput="document.getElementById('mcXL').textContent=this.value"></div>
+    </div>
+    <div class="bgrp"><button class="btn btnp" onclick="runMC()">🎲 Jalankan Uji Acak</button><button class="btn btns" onclick="resetMC()">↺ Reset</button></div>
+  </div>
+  <div class="mcst">
+    <div class="stb"><div class="stv" id="mc1">—</div><div class="stl">Iterasi</div></div>
+    <div class="stb"><div class="stv" id="mc2">—</div><div class="stl">Feasibel</div></div>
+    <div class="stb"><div class="stv" id="mc3">—</div><div class="stl">Z Terbaik</div></div>
+    <div class="stb"><div class="stv" id="mc4">—</div><div class="stl">x,y Terbaik</div></div>
+    <div class="stb"><div class="stv" id="mc5">—</div><div class="stl">Akurasi ke Optimal</div></div>
+  </div>
+  <div class="card" style="margin-top:.8rem"><div class="gwrap"><canvas id="mcCanvas" width="680" height="370"></canvas></div></div>
+  <div class="card"><div class="mclog" id="mcLog"><span style="color:var(--muted)">Tekan Jalankan...</span></div></div>
+</div>
+
+<!-- SENSITIVITAS -->
+<div id="tab-sensitif" class="sec">
+  <div class="card"><div class="sg">
+    <div class="ssg"><div class="lbl" style="color:var(--acc)">🚗 Keuntungan Mobil</div><div class="sub">$<span id="pCL">3000</span></div><input type="range" min="500" max="8000" step="100" value="3000" id="pC" oninput="updSens()"></div>
+    <div class="ssg"><div class="lbl" style="color:var(--acc2)">🚛 Keuntungan Truk</div><div class="sub">$<span id="pTL">2000</span></div><input type="range" min="500" max="8000" step="100" value="2000" id="pT" oninput="updSens()"></div>
+    <div class="ssg"><div class="lbl">⚙️ Kapasitas Mesin/Bodi</div><div class="sub"><span id="c2L">2500</span> jam</div><input type="range" min="600" max="5000" step="100" value="2500" id="c2" oninput="updSens()"></div>
+    <div class="ssg"><div class="lbl">🔧 Kapasitas Refinishing</div><div class="sub"><span id="c1L">2400</span> jam</div><input type="range" min="600" max="5000" step="100" value="2400" id="c1" oninput="updSens()"></div>
+  </div></div>
+  <div class="card">
+    <div class="sres">
+      <div style="font-size:.68rem;color:var(--muted);margin-bottom:.35rem;font-family:'JetBrains Mono',monospace">SOLUSI OPTIMAL SAAT INI</div>
+      <div class="big" id="sZ">$150.000</div>
+      <div class="det" id="sXY">x=50 mobil, y=0 truk</div>
+      <div class="ci csm" id="sCh">—</div>
+    </div>
+    <div class="gwrap"><canvas id="sensCanvas" width="680" height="320"></canvas></div>
+  </div>
+</div>
+
+<!-- JADWAL PRODUKSI -->
+<div id="tab-jadwal" class="sec">
+
+  <!-- CHALLENGE CARD -->
+  <div class="card">
+    <div class="ctit">🎯 Analisis Alur Kerja: Johnson's Rule</div>
+    <div class="eb">Solusi LP awal merekomendasikan 50 mobil, 0 truk. Jika manajemen <strong>mewajibkan produksi truk campuran</strong>, kita harus menyusun jadwal <em>Flow Shop</em> menggunakan <strong>Johnson's Rule</strong> agar total waktu penyelesaian (*makespan*) menjadi minimal.</div>
+    <div class="flowdiag">
+      <div class="fdnode" style="border-color:var(--muted);background:rgba(255,255,255,.03)"><div class="ftit2" style="color:var(--muted)">📦 MASUK</div><div class="fdet">Antrian kendaraan</div></div>
+      <div class="fdarr">→</div>
+      <div class="fdnode mesin"><div class="ftit2" style="color:var(--acc2)">⚙️ MESIN/BODI</div><div class="fdet">Tahap 1<br>Mobil & Truk: 50j</div></div>
+      <div class="fdarr">→</div>
+      <div class="fdnode ref"><div class="ftit2" style="color:var(--acc)">🔧 REFINISHING</div><div class="fdet">Tahap 2<br>Mobil: 40j<br>Truk: 60j</div></div>
+      <div class="fdarr">→</div>
+      <div class="fdnode end"><div class="ftit2" style="color:var(--gold)">💰 DIJUAL</div><div class="fdet">Mobil: $P_car<br>Truk: $P_truck</div></div>
+    </div>
+  </div>
+
+  <!-- KONTROL UTAMA -->
+  <div class="card">
+    <div class="ctit">⚙️ Atur Skenario Produksi (Max 50 Unit)</div>
+
+    <!-- Mode toggle -->
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em">Variabel Harga Jual (Target Laba Total Tetap $150.000):</div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeBtn1" onclick="setMode(1)">🚗 Auto-Harga Mobil</button>
+      <button class="mode-btn" id="modeBtn2" onclick="setMode(2)">🚛 Auto-Harga Truk</button>
+      <button class="mode-btn" id="modeBtn3" onclick="setMode(3)">🔀 Manual (Bebas)</button>
+    </div>
+
+    <!-- PRESET SCENARIOS -->
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.07em">Skenario Komposisi Cepat:</div>
+    <div class="presets" id="presetRow"></div>
+
+    <!-- SLIDERS -->
+    <div class="mctrl" style="margin-top:.8rem">
+      <div class="slg">
+        <div class="sll">🚛 Jumlah Truk: <span class="slv" id="jTruckLbl">5</span> unit</div>
+        <input type="range" min="0" max="20" step="1" value="0" id="jTruckSlider" oninput="updJ()">
+        <div style="font-size:.63rem;color:var(--muted);margin-top:.22rem;font-family:'JetBrains Mono',monospace">0–20 truk · Mobil = 50 − jumlah truk</div>
+      </div>
+      <div class="slg" id="sliderHargaMobil">
+        <div class="sll">🚗 Harga Jual Mobil: $<span class="slv" id="jPcarLbl">3000</span></div>
+        <input type="range" min="1000" max="8000" step="50" value="3000" id="jPcarSlider" oninput="updJ()">
+        <div style="font-size:.63rem;color:var(--muted);margin-top:.22rem;font-family:'JetBrains Mono',monospace">Harga disesuaikan otomatis</div>
+      </div>
+      <div class="slg" id="sliderHargaTruk" style="display:none">
+        <div class="sll">🚛 Harga Jual Truk: $<span class="slv" id="jPtruckLbl">2000</span></div>
+        <input type="range" min="1000" max="10000" step="50" value="2000" id="jPtruckSlider" oninput="updJ()">
+        <div style="font-size:.63rem;color:var(--muted);margin-top:.22rem;font-family:'JetBrains Mono',monospace">Harga disesuaikan otomatis</div>
+      </div>
+    </div>
+
+    <!-- JAM BUKA -->
+    <div class="slg" style="max-width:400px;margin-top:.2rem">
+      <div class="sll">⏰ Jam Buka Bengkel/Hari: <span class="slv" id="jHrLbl">10</span> jam</div>
+      <input type="range" min="8" max="24" step="1" value="10" id="jHrSlider" oninput="updJ()">
+    </div>
+  </div>
+
+  <!-- FEASIBILITY CHECK -->
+  <div class="alert" id="feasAlert">⚠️ Peringatan: Komposisi ini melebihi batasan kapasitas (2500j / 2400j)! Kurangi jumlah truk.</div>
+
+  <!-- RESULT HERO -->
+  <div class="result-hero" id="resultHero">
+    <div class="rh-tag">Proyeksi Total Keuntungan</div>
+    <div class="rh-profit" id="rhProfit">$150.000</div>
+    <div class="rh-detail" id="rhDetail">—</div>
+    <div class="rh-formula" id="rhFormula">—</div>
+  </div>
+
+  <!-- BIG STATS -->
+  <div class="big-display">
+    <div class="big-stat"><div class="bval" id="bsX" style="color:var(--acc)">—</div><div class="blbl">🚗 Total Mobil</div></div>
+    <div class="big-stat highlight"><div class="bval" id="bsY" style="color:var(--gold)">—</div><div class="blbl">🚛 Total Truk</div></div>
+    <div class="big-stat"><div class="bval" id="bsDays" style="color:var(--acc3)">—</div><div class="blbl">⏱️ Waktu Selesai (Makespan)</div></div>
+  </div>
+
+  <!-- LANGKAH 1: KAPASITAS -->
+  <div class="card">
+    <div class="ctit"><div class="num">1</div>Verifikasi Penggunaan Kapasitas Bengkel</div>
+    <div style="margin-bottom:.7rem">
+      <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:.3rem">
+        <span style="font-weight:600">⚙️ Mesin/Bodi (Batas: 2500j)</span><span id="feasM" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)">—</span>
+      </div>
+      <div class="feas-bar"><div class="feas-fill" id="feasBarM" style="width:0%;background:var(--acc)"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:.3rem">
+        <span style="font-weight:600">🔧 Refinishing/Cat (Batas: 2400j)</span><span id="feasR" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)">—</span>
+      </div>
+      <div class="feas-bar"><div class="feas-fill" id="feasBarR" style="width:0%;background:var(--acc)"></div></div>
+    </div>
+  </div>
+
+  <!-- LANGKAH 3: WAKTU PER KENDARAAN -->
+  <div class="card">
+    <div class="ctit"><div class="num">2</div>Kecepatan Pemrosesan per Stasiun</div>
+    <div class="g2">
+      <div class="fbox"><div class="fl" style="color:var(--acc2)">⚙️ Mesin/Bodi (Sama Cepat)</div><div id="timeM">—</div></div>
+      <div class="fbox"><div class="fl" style="color:var(--acc)">🔧 Refinishing/Cat (Berbeda!)</div><div id="timeR">—</div></div>
+    </div>
+  </div>
+
+  <!-- LANGKAH 4: GANTT CHART (DIKOREKSI) -->
+  <div class="card">
+    <div class="ctit"><div class="num">3</div>Gantt Chart (Jadwal Flow Shop)</div>
+    <div class="eb gold" id="ganttDesc">
+      <!-- Deskripsi akan diisi secara dinamis oleh JavaScript -->
+    </div>
+    <div class="gwrap" style="position:relative">
+      <canvas id="ganttMain" width="680" height="600" style="cursor:crosshair"></canvas>
+      <div class="gleg">
+        <div class="gli"><div class="gld" style="background:#a78bfa"></div>Tahap 1 — Truk (Urutan Awal)</div>
+        <div class="gli"><div class="gld" style="background:#fbbf24"></div>Tahap 2 — Truk</div>
+        <div class="gli"><div class="gld" style="background:#ff6b35"></div>Tahap 1 — Mobil (Urutan Akhir)</div>
+        <div class="gli"><div class="gld" style="background:#00d4aa"></div>Tahap 2 — Mobil</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LANGKAH 5: KUMULATIF -->
+  <div class="card">
+    <div class="ctit"><div class="num">4</div>Kurva Akumulasi Keuntungan</div>
+    <div class="eb">Titik pada grafik menandakan momen kendaraan selesai dicat dan masuk inventaris siap jual. <span style="color:var(--gold);font-weight:700">Dot kuning</span> = Truk selesai duluan (+$P_truck). <span style="color:var(--acc);font-weight:700">Dot hijau</span> = Mobil menyusul (+$P_car).</div>
+    <canvas id="cumCanvas" width="680" height="250" style="border-radius:8px;max-width:100%;display:block;background:#111827"></canvas>
+  </div>
+
+  <!-- LANGKAH 6: RINGKASAN -->
+  <div class="card">
+    <div class="ctit"><div class="num">5</div>Ringkasan Analitik Penjadwalan</div>
+    <div class="smg" id="smGrid">
+      <div class="smc"><div class="sv" id="sm1" style="color:var(--acc)">—</div><div class="sl">Jumlah Mobil</div></div>
+      <div class="smc"><div class="sv" id="sm2" style="color:var(--gold)">—</div><div class="sl">Jumlah Truk</div></div>
+      <div class="smc"><div class="sv" id="sm3" style="color:var(--acc2)">—</div><div class="sl">Hari/Kend. (Mesin)</div></div>
+      <div class="smc"><div class="sv" id="sm4" style="color:var(--acc)">—</div><div class="sl">Hari/Mobil (Refin.)</div></div>
+      <div class="smc"><div class="sv" id="sm5" style="color:var(--gold)">—</div><div class="sl">Hari/Truk (Refin.)</div></div>
+      <div class="smc"><div class="sv" id="sm6" style="color:var(--acc3)">—</div><div class="sl">Total Waktu (Hari)</div></div>
+      <div class="smc"><div class="sv" id="sm7" style="color:var(--gold)">—</div><div class="sl">Harga Jual Mobil</div></div>
+      <div class="smc"><div class="sv" id="sm8" style="color:var(--gold)">—</div><div class="sl">Harga Jual Truk</div></div>
+    </div>
+    <div class="eb gold" style="margin-top:1rem;margin-bottom:0" id="concBox">—</div>
+  </div>
+
+</div><!-- end jadwal -->
+</div><!-- wrap -->
+
+<script>
+// ===== TAB =====
+function showTab(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='grafik')drawMainG();
+  if(id==='sensitif')updSens();
+  if(id==='jadwal')updJ();
+}
+
+// ===== GRAPH =====
+function drawGraph(cvs,pCar,pTruck,c1,c2){
+  pCar=pCar||3000;pTruck=pTruck||2000;c1=c1||2400;c2=c2||2500;
+  const ctx=cvs.getContext('2d'),W=cvs.width,H=cvs.height;
+  const h1c=40,h1t=60,h2c=50,h2t=50;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#111827';ctx.fillRect(0,0,W,H);
+  const pad={l:56,r:22,t:26,b:50};
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b,XM=75,YM=75;
+  const px=x=>pad.l+(x/XM)*gw,py=y=>pad.t+gh-(y/YM)*gh;
+  ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
+  for(let i=0;i<=7;i++){const v=i*10;ctx.beginPath();ctx.moveTo(px(v),pad.t);ctx.lineTo(px(v),pad.t+gh);ctx.stroke();ctx.beginPath();ctx.moveTo(pad.l,py(v));ctx.lineTo(pad.l+gw,py(v));ctx.stroke();}
+  const det=h1c*h2t-h1t*h2c;let ix=null,iy=null;
+  if(Math.abs(det)>.001){ix=(c1*h2t-h1t*c2)/det;iy=(h1c*c2-c1*h2c)/det;}
+  const xi=Math.min(c1/h1c,c2/h2c),yi=Math.min(c1/h1t,c2/h2t);
+  let poly=[[0,0],[xi,0]];
+  if(ix!=null&&ix>=0&&iy>=0&&ix<=c1/h1c+.01&&ix<=c2/h2c+.01)poly.push([ix,iy]);
+  poly.push([0,yi]);
+  ctx.beginPath();poly.forEach(([x,y],i)=>{i?ctx.lineTo(px(x),py(y)):ctx.moveTo(px(x),py(y));});
+  ctx.closePath();ctx.fillStyle='rgba(0,212,170,.1)';ctx.fill();ctx.strokeStyle='rgba(0,212,170,.2)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.setLineDash([5,4]);
+  ctx.strokeStyle='#ff6b35';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(px(0),py(c2/h2t));ctx.lineTo(px(c2/h2c),py(0));ctx.stroke();
+  ctx.strokeStyle='#00d4aa';ctx.beginPath();ctx.moveTo(px(0),py(c1/h1t));ctx.lineTo(px(c1/h1c),py(0));ctx.stroke();
+  ctx.setLineDash([]);
+  let bZ=-Infinity,bx=0,by=0;
+  poly.forEach(([x,y])=>{const z=pCar*x+pTruck*y;if(z>bZ){bZ=z;bx=x;by=y;}});
+  if(bZ>0){ctx.beginPath();ctx.moveTo(px(0),py(bZ/pTruck));ctx.lineTo(px(bZ/pCar),py(0));ctx.strokeStyle='rgba(251,191,36,.3)';ctx.lineWidth=2;ctx.setLineDash([8,5]);ctx.stroke();ctx.setLineDash([]);}
+  ctx.strokeStyle='rgba(255,255,255,.28)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.moveTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.38)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+  for(let i=0;i<=7;i++){const v=i*10;ctx.fillText(v,px(v),pad.t+gh+16);}
+  ctx.textAlign='right';for(let i=1;i<=7;i++){const v=i*10;ctx.fillText(v,pad.l-6,py(v)+4);}
+  ctx.fillStyle='#00d4aa';ctx.font='11px Syne,sans-serif';ctx.textAlign='center';
+  ctx.fillText('x (Mobil)',pad.l+gw/2,H-7);ctx.save();ctx.translate(13,pad.t+gh/2);ctx.rotate(-Math.PI/2);ctx.fillText('y (Truk)',0,0);ctx.restore();
+  const cols=['rgba(255,255,255,.45)','#fbbf24','#a78bfa','#60a5fa'];
+  poly.forEach(([x,y],i)=>{
+    const opt=Math.abs(x-bx)<.1&&Math.abs(y-by)<.1;const z=pCar*x+pTruck*y;
+    ctx.beginPath();ctx.arc(px(x),py(y),opt?8:5,0,Math.PI*2);ctx.fillStyle=opt?'#fbbf24':cols[i]||'#60a5fa';ctx.fill();
+    if(opt){ctx.beginPath();ctx.arc(px(x),py(y),14,0,Math.PI*2);ctx.strokeStyle='rgba(251,191,36,.35)';ctx.lineWidth=2.5;ctx.stroke();}
+    ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+    ctx.fillText(`(${Math.round(x)},${Math.round(y)})`,px(x),py(y)-13);
+    ctx.fillStyle=opt?'#fbbf24':'rgba(255,255,255,.38)';
+    ctx.fillText('$'+(z/1000).toFixed(0)+'k',px(x),py(y)-4);
+  });
+}
+function drawMainG(){drawGraph(document.getElementById('graphCanvas'));}
+
+// ===== SIMPLEKS =====
+let sxN=0;
+const sxD=[
+  {t:'Langkah 0 — Formulasi Standar',c:'Maks Z = 3000x + 2000y + 0·s₁ + 0·s₂\n<span class="cr">50x + 50y + s₁ = 2500</span>\n<span class="cr">40x + 60y + s₂ = 2400</span>\nSolusi awal: x=0,y=0 → Z=<span class="pr">$0</span>'},
+  {t:'Langkah 1 — Variabel Masuk',c:'x=<span class="hl">3000</span> (terbesar) → <span class="hl">x masuk</span>'},
+  {t:'Langkah 2 — Ratio Test',c:'s₁: 2500÷50=<span class="cr">50</span> ← min!\ns₂: 2400÷40=60\n→ <span class="hl">s₁ keluar</span>, pivot=50'},
+  {t:'Langkah 3 — Pivot',c:'Normalisasi s₁÷50: <span class="cr">x+y+(1/50)s₁=50</span>\nUpdate Z: <span class="pr">Z−1000y+60s₁=150.000</span>'},
+  {t:'Langkah 4 — Cek',c:'koef y=+1000 → iterasi lanjut → y masuk berikutnya\nRatio: s₂: 400÷20=<span class="cr">20</span> ← min → s₂ keluar'},
+  {t:'Langkah 5 — Iterasi 2',c:'Setelah pivot: x=30, y=20 → Z=<span class="pr">$130.000</span>\nBandingkan → x=50,y=0 lebih baik!'},
+  {t:'✅ Solusi Optimal',c:'<span class="pr">x=50 mobil, y=0 truk, Z=$150.000</span>\nMesin/Bodi: 2500≤2500 ✅ · Refinishing: 2000≤2400 ✅'}
+];
+function renderSx(){
+  const c=document.getElementById('sxSteps');c.innerHTML='';
+  sxD.forEach((s,i)=>{
+    const on=i<sxN;const d=document.createElement('div');d.className='sstep'+(on?'':' off');
+    d.innerHTML=`<div class="shdr"><div class="snum2">${i}</div>${s.t}</div>`+(on?`<div class="sbody">${s.c.replace(/\n/g,'<br>')}</div>`:'');
+    c.appendChild(d);
+  });
+  document.getElementById('sxProg').style.width=`${(sxN/sxD.length)*100}%`;
+}
+function sxNext(){if(sxN<sxD.length)sxN++;renderSx();}
+function sxReset(){sxN=0;renderSx();}
+function sxAll(){sxN=sxD.length;renderSx();}
+
+// ===== MONTE CARLO =====
+function runMC(){
+  const n=+document.getElementById('mcIS').value,xM=+document.getElementById('mcXS').value;
+  const yM=80,OPT=150000;
+  const cvs=document.getElementById('mcCanvas'),ctx=cvs.getContext('2d');
+  const W=cvs.width,H=cvs.height;const pad={l:50,r:16,t:16,b:46};
+  const gw=W-pad.l-pad.r,gh=H-pad.t-pad.b;
+  const px=x=>pad.l+(x/xM)*gw,py=y=>pad.t+gh-(y/yM)*gh;
+  ctx.fillStyle='#111827';ctx.fillRect(0,0,W,H);
+  let fC=0,bZ=-Infinity,bx=0,by=0;const pts=[];
+  for(let i=0;i<n;i++){
+    const x=Math.random()*xM,y=Math.random()*yM;
+    const f=(50*x+50*y<=2500)&&(40*x+60*y<=2400);
+    const z=3000*x+2000*y;if(f){fC++;if(z>bZ){bZ=z;bx=x;by=y;}}pts.push({x,y,f});
+  }
+  const st=Math.max(1,Math.floor(n/2500));
+  for(let i=0;i<pts.length;i+=st){const {x,y,f}=pts[i];ctx.beginPath();ctx.arc(px(x),py(y),1.5,0,Math.PI*2);ctx.fillStyle=f?'rgba(0,212,170,.5)':'rgba(255,255,255,.07)';ctx.fill();}
+  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.moveTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.32)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='center';
+  for(let i=0;i<=Math.floor(xM/10);i++){const v=i*10;ctx.fillText(v,px(v),pad.t+gh+14);}
+  ctx.textAlign='right';for(let i=1;i<=Math.floor(yM/10);i++){const v=i*10;ctx.fillText(v,pad.l-4,py(v)+4);}
+  ctx.beginPath();ctx.arc(px(bx),py(by),8,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();
+  ctx.beginPath();ctx.arc(px(bx),py(by),13,0,Math.PI*2);ctx.strokeStyle='rgba(251,191,36,.35)';ctx.lineWidth=2;ctx.stroke();
+  const acc=(bZ/OPT*100).toFixed(2);
+  document.getElementById('mc1').textContent=n.toLocaleString();
+  document.getElementById('mc2').textContent=fC.toLocaleString()+` (${(fC/n*100).toFixed(1)}%)`;
+  document.getElementById('mc3').textContent='$'+Math.round(bZ).toLocaleString();
+  document.getElementById('mc4').textContent=`${bx.toFixed(1)},${by.toFixed(1)}`;
+  document.getElementById('mc5').textContent=acc+'%';
+  document.getElementById('mcLog').innerHTML=`<span style="color:var(--acc)">Selesai: ${n} iterasi</span><br>Feasibel: ${fC}<br><span style="color:var(--gold)">Z best: $${Math.round(bZ).toLocaleString()}</span><br>Akurasi: ${acc}% <br><span style="color:var(--muted); font-size: 0.85em;">(Model Evaluasi Diskrit/Integer)</span>`;
+}
+function resetMC(){
+  const c=document.getElementById('mcCanvas'),ctx=c.getContext('2d');
+  ctx.fillStyle='#111827';ctx.fillRect(0,0,c.width,c.height);
+  ['mc1','mc2','mc3','mc4','mc5'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('mcLog').innerHTML='<span style="color:var(--muted)">Reset.</span>';
+}
+
+// ===== SENSITIVITAS =====
+let pSZ=150000;
+function updSens(){
+  const pC=+document.getElementById('pC').value,pTr=+document.getElementById('pT').value;
+  const c1=+document.getElementById('c1').value,c2=+document.getElementById('c2').value;
+  document.getElementById('pCL').textContent=pC.toLocaleString();
+  document.getElementById('pTL').textContent=pTr.toLocaleString();
+  document.getElementById('c1L').textContent=c1.toLocaleString();
+  document.getElementById('c2L').textContent=c2.toLocaleString();
+  const h1c=40,h1t=60,h2c=50,h2t=50;
+  const det=h1c*h2t-h1t*h2c;let ix=null,iy=null;
+  if(Math.abs(det)>.001){ix=(c1*h2t-h1t*c2)/det;iy=(h1c*c2-c1*h2c)/det;}
+  const xi=Math.min(c1/h1c,c2/h2c),yi=Math.min(c1/h1t,c2/h2t);
+  const cands=[[0,0],[xi,0],[0,yi]];if(ix!=null&&ix>=0&&iy>=0)cands.push([ix,iy]);
+  let bZ=-Infinity,bx=0,by=0;
+  cands.forEach(([x,y])=>{if(x<-.001||y<-.001)return;const z=pC*x+pTr*y;if(z>bZ){bZ=z;bx=x;by=y;}});
+  const rZ=Math.round(bZ);
+  document.getElementById('sZ').textContent='$'+rZ.toLocaleString();
+  document.getElementById('sXY').textContent=`x=${Math.round(bx)} mobil, y=${Math.round(by)} truk`;
+  const d=rZ-pSZ;const el=document.getElementById('sCh');
+  el.className='ci '+(d>0?'cup':d<0?'cdn':'csm');
+  el.textContent=d!==0?`${d>0?'▲':'▼'} $${Math.abs(d).toLocaleString()} dari baseline`:'— sama dengan baseline';
+  pSZ=rZ;
+  drawGraph(document.getElementById('sensCanvas'),pC,pTr,c1,c2);
+}
+
+// =====================
+// JADWAL PRODUKSI BARU (JOHNSON'S RULE FIX)
+// =====================
+let currentMode = 1;
+
+const PRESETS = [
+  {label:'0 Truk (Optimal LP)', y:0},
+  {label:'5 Truk', y:5},
+  {label:'10 Truk', y:10},
+  {label:'15 Truk', y:15},
+  {label:'20 Truk', y:20},
+];
+
+function buildPresets(){
+  const row = document.getElementById('presetRow');
+  row.innerHTML = '';
+  PRESETS.forEach((p,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-chip';
+    btn.textContent = p.label;
+    btn.onclick = () => {
+      document.getElementById('jTruckSlider').value = p.y;
+      document.querySelectorAll('.preset-chip').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      updJ();
+    };
+    row.appendChild(btn);
+  });
+}
+
+function setMode(m){
+  currentMode = m;
+  document.getElementById('modeBtn1').className = 'mode-btn' + (m===1?' active':'');
+  document.getElementById('modeBtn2').className = 'mode-btn' + (m===2?' active':'');
+  document.getElementById('modeBtn3').className = 'mode-btn' + (m===3?' active':'');
+  document.getElementById('sliderHargaMobil').style.display = (m===1||m===3) ? '' : 'none';
+  document.getElementById('sliderHargaTruk').style.display  = (m===2||m===3) ? '' : 'none';
+  updJ();
+}
+
+function fmt(v,dec=2){return v%1===0?v.toFixed(0):v.toFixed(dec);}
+
+function updJ(){
+  const y    = +document.getElementById('jTruckSlider').value;
+  const DH   = +document.getElementById('jHrSlider').value;
+  const x    = 50 - y;
+  const TARGET = 150000;
+
+  document.getElementById('jTruckLbl').textContent = y;
+  document.getElementById('jHrLbl').textContent = DH;
+
+  let pCar, pTruck;
+  if(currentMode === 1){
+    pTruck = 2000;
+    if(x > 0) pCar = (TARGET - pTruck * y) / x; else pCar = 0;
+    document.getElementById('jPcarSlider').value = Math.round(Math.max(1000,Math.min(8000,pCar)));
+    document.getElementById('jPcarLbl').textContent = Math.round(pCar).toLocaleString();
+  } else if(currentMode === 2){
+    pCar = 3000;
+    if(y > 0) pTruck = (TARGET - pCar * x) / y; else pTruck = 0;
+    document.getElementById('jPtruckSlider').value = Math.round(Math.max(1000,Math.min(10000,pTruck)));
+    document.getElementById('jPtruckLbl').textContent = Math.round(pTruck).toLocaleString();
+  } else {
+    pCar   = +document.getElementById('jPcarSlider').value;
+    pTruck = +document.getElementById('jPtruckSlider').value;
+    document.getElementById('jPcarLbl').textContent   = pCar.toLocaleString();
+    document.getElementById('jPtruckLbl').textContent = pTruck.toLocaleString();
+  }
+
+  const totalProfit = Math.round(pCar * x + pTruck * y);
+  const profitOK = Math.abs(totalProfit - TARGET) <= 5;
+
+  // Kapasitas Check
+  const usedM = 50 * x + 50 * y; 
+  const usedR = 40 * x + 60 * y;
+  const capM = 2500, capR = 2400;
+  const feasM = usedM <= capM;
+  const feasR = usedR <= capR;
+  const feasOK = feasM && feasR;
+  const pctM = Math.min(100, usedM/capM*100);
+  const pctR = Math.min(100, usedR/capR*100);
+
+  document.getElementById('feasAlert').className = 'alert' + (feasOK ? '' : ' show');
+  document.getElementById('feasBarM').style.width = pctM.toFixed(1)+'%';
+  document.getElementById('feasBarM').style.background = pctM>100?'#f87171':pctM>=95?'#fbbf24':'var(--acc)';
+  document.getElementById('feasM').textContent = `${usedM} / ${capM} jam (${pctM.toFixed(1)}%)`;
+
+  document.getElementById('feasBarR').style.width = Math.min(100,pctR).toFixed(1)+'%';
+  document.getElementById('feasBarR').style.background = pctR>100?'#f87171':pctR>=95?'#fbbf24':'var(--acc)';
+  document.getElementById('feasR').textContent = `${usedR} / ${capR} jam (${pctR.toFixed(1)}%)`;
+
+  const hero = document.getElementById('resultHero');
+  hero.style.borderColor = profitOK ? 'rgba(0,212,170,.4)' : 'rgba(251,191,36,.4)';
+  document.getElementById('rhProfit').textContent = '$' + totalProfit.toLocaleString();
+  document.getElementById('rhProfit').style.color = profitOK ? 'var(--acc)' : 'var(--gold)';
+  document.getElementById('rhDetail').textContent = `${x} mobil × $${Math.round(pCar).toLocaleString()} + ${y} truk × $${Math.round(pTruck).toLocaleString()}`;
+
+  document.getElementById('bsX').textContent = x + ' unit';
+  document.getElementById('bsY').textContent = y + ' unit';
+
+  // ----------------------------------------------------
+  // JOHNSON'S RULE PIPELINE SIMULATOR (100% ACCURATE)
+  // ----------------------------------------------------
+  const H_M = 50, H_RM = 40, H_RT = 60;
+  
+  // Create job queue: Trucks first, Cars last!
+  let sequence = [];
+  for(let i=0; i<y; i++) sequence.push({type:'truck', m1: H_M, m2: H_RT, p: pTruck, label: 'T'+(i+1)});
+  for(let i=0; i<x; i++) sequence.push({type:'car', m1: H_M, m2: H_RM, p: pCar, label: 'M'+(i+1)});
+
+  let m1_end = 0;
+  let m2_end = 0;
+  let schedule = [];
+  
+  for(let i=0; i<sequence.length; i++){
+      let job = sequence[i];
+      let start_m1 = m1_end;
+      m1_end = start_m1 + job.m1;
+      
+      // M2 can only start when M1 is done AND M2 is free from previous job
+      let start_m2 = Math.max(m1_end, m2_end);
+      m2_end = start_m2 + job.m2;
+      
+      schedule.push({
+          ...job, 
+          m1_s: start_m1/DH, 
+          m1_e: m1_end/DH, 
+          m2_s: start_m2/DH, 
+          m2_e: m2_end/DH, 
+          idx: i
+      });
+  }
+  
+  const totalDaysExact = m2_end / DH;
+  const totalDaysCeil = Math.ceil(totalDaysExact);
+  
+  document.getElementById('bsDays').textContent = totalDaysCeil + ' hari';
+  document.getElementById('timeM').innerHTML = `${DH} jam/hari ÷ ${H_M} jam/kend = <span style="color:var(--acc2);font-weight:700">${fmt(H_M/DH)} hari/kendaraan</span><br><span style="color:var(--muted);font-size:.85em">(Sama untuk mobil & truk)</span>`;
+  document.getElementById('timeR').innerHTML = `Mobil: ${H_RM}÷${DH} = <span style="color:var(--acc);font-weight:700">${fmt(H_RM/DH)} hari/mobil</span><br>Truk: ${H_RT}÷${DH} = <span style="color:var(--gold);font-weight:700">${fmt(H_RT/DH)} hari/truk</span>`;
+
+  // Summary
+  document.getElementById('sm1').textContent = x;
+  document.getElementById('sm2').textContent = y;
+  document.getElementById('sm3').textContent = fmt(H_M/DH)+' hr';
+  document.getElementById('sm4').textContent = fmt(H_RM/DH)+' hr';
+  document.getElementById('sm5').textContent = fmt(H_RT/DH)+' hr';
+  document.getElementById('sm6').textContent = totalDaysCeil+' hari';
+  document.getElementById('sm7').textContent = '$'+Math.round(pCar).toLocaleString();
+  document.getElementById('sm8').textContent = '$'+Math.round(pTruck).toLocaleString();
+
+  // Dynamic Gantt Description based on logic (0 truk vs campuran)
+  const ganttDesc = document.getElementById('ganttDesc');
+  if (y === 0) {
+    ganttDesc.innerHTML = `<strong>Skenario Optimal LP Murni (50 Mobil):</strong> Karena hanya memproduksi satu jenis kendaraan, antrean bersifat sekuensial lurus. Mesin 1 (Bodi) akan terus menyala tanpa putus selama 2.500 jam. Mesin 2 (Refinishing) akan selesai tepat 40 jam setelah mobil terakhir keluar dari Mesin 1.<br><br>
+    <span style="color:var(--acc2);font-weight:700">■ Oranye</span> = Mesin Mobil, 
+    <span style="color:var(--acc);font-weight:700">■ Hijau</span> = Refinishing Mobil.`;
+  } else {
+    ganttDesc.innerHTML = `<strong>Koreksi Algoritma Johnson (Campuran):</strong> Waktu terpendek absolut adalah 40 jam (Refinishing Mobil, Tahap 2). Karena nilai minimum di <strong>Mesin 2</strong>, seluruh jadwal <strong>Mobil diletakkan di akhir urutan</strong>. Sebaliknya, <strong>Truk diproses lebih awal</strong> (di awal urutan). Urutan ini meminimalkan <em>idle time</em> di bengkel Refinishing!<br><br>
+    <span style="color:var(--acc3);font-weight:700">■ Ungu</span> = Mesin Truk, 
+    <span style="color:var(--gold);font-weight:700">■ Kuning</span> = Refinishing Truk,<br>
+    <span style="color:var(--acc2);font-weight:700">■ Oranye</span> = Mesin Mobil, 
+    <span style="color:var(--acc);font-weight:700">■ Hijau</span> = Refinishing Mobil.`;
+  }
+
+  // Conclusion
+  if (y === 0) {
+    document.getElementById('concBox').innerHTML =
+      `<strong>Komposisi Optimal LP:</strong> ${x} mobil (@$${Math.round(pCar).toLocaleString()}) + 0 truk → Total $${totalProfit.toLocaleString()} (Maksimal absolut).<br>`+
+      `<strong>Analisis Waktu Pemrosesan (Makespan):</strong><br>`+
+      `• Mesin 1 (Bodi) bekerja tanpa henti untuk 50 mobil: 50 mobil × 50 jam = <strong>2.500 jam</strong>.<br>`+
+      `• Mesin 2 (Cat) untuk mobil terakhir selesai 40 jam setelah Mesin 1 beres.<br>`+
+      `• Total Jam Operasional: 2.500 jam + 40 jam = <strong>2.540 jam</strong>.<br>`+
+      `• Total Hari (${DH} jam/hari): 2.540 ÷ ${DH} = <strong>${fmt(2540/DH, 1)} hari kerja</strong>.<br>`+
+      `<em>Ini adalah waktu penyelesaian paling efisien tanpa adanya bottleneck jeda tunggu di tengah-tengah Mesin 2.</em>`;
+  } else {
+    document.getElementById('concBox').innerHTML =
+      `<strong>Komposisi:</strong> ${x} mobil (@$${Math.round(pCar).toLocaleString()}) + ${y} truk (@$${Math.round(pTruck).toLocaleString()}) → Total $${totalProfit.toLocaleString()}<br>`+
+      `<strong>Urutan Penjadwalan:</strong> Semua ${y} truk dikerjakan LEBIH AWAL di Mesin 1 (karena Refinishingnya butuh waktu lebih lama), disusul ${x} mobil. Strategi ini secara analitik meminimalkan <em>idle time</em> di stasiun Refinishing.<br>`+
+      `<strong>Waktu Penyelesaian Aktual:</strong> ${fmt(totalDaysExact, 1)} hari kerja (dibulatkan ke ${totalDaysCeil} hari).<br>`;
+  }
+
+  // Draw charts with exact schedule
+  drawGanttExact(schedule, totalDaysExact);
+  drawCumExact(schedule, totalProfit);
+}
+
+function drawGanttExact(schedule, totalDays){
+  const cvs = document.getElementById('ganttMain');
+  if(!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const W=cvs.width, H=cvs.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#111827'; ctx.fillRect(0,0,W,H);
+
+  const N = schedule.length;
+  const pad={l:52,r:20,t:22,b:40};
+  const gw=W-pad.l-pad.r, gh=H-pad.t-pad.b;
+  const rowH = gh / Math.max(N, 1);
+  const scX = gw / totalDays;
+
+  // Vertical Grid
+  const nTk = Math.min(20, Math.ceil(totalDays));
+  ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=1;
+  for(let i=0;i<=nTk;i++){const x=pad.l+(i/nTk)*totalDays*scX;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+gh);ctx.stroke();}
+
+  // Draw Blocks
+  for(let job of schedule){
+    const y = pad.t + job.idx * rowH;
+    const bH = Math.max(2, rowH - 1.5);
+    
+    // Draw M1 (Mesin)
+    const mx1 = pad.l + job.m1_s * scX, mx2 = pad.l + job.m1_e * scX;
+    ctx.fillStyle = job.type === 'car' ? 'rgba(255,107,53,0.85)' : 'rgba(167,139,250,0.85)';
+    ctx.fillRect(mx1, y, Math.max(1, mx2-mx1), bH);
+    
+    // Draw M2 (Refinishing)
+    const rx1 = pad.l + job.m2_s * scX, rx2 = pad.l + job.m2_e * scX;
+    ctx.fillStyle = job.type === 'car' ? 'rgba(0,212,170,0.85)' : 'rgba(251,191,36,0.85)';
+    ctx.fillRect(rx1, y, Math.max(1, rx2-rx1), bH);
+
+    // Queue wait line (If M1 is done but M2 hasn't started due to backlog)
+    if(rx1 > mx2 + 0.5) {
+      ctx.beginPath(); ctx.moveTo(mx2, y+bH/2); ctx.lineTo(rx1, y+bH/2);
+      ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.setLineDash([2,2]); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    // Y Label
+    if(rowH >= 7){
+      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font=`${Math.min(9,rowH-1)}px JetBrains Mono,monospace`;
+      ctx.textAlign='right'; ctx.fillText(job.label, pad.l-4, y+rowH/2+3);
+    }
+  }
+
+  // Axes
+  ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.moveTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+
+  // X labels
+  ctx.fillStyle='rgba(255,255,255,.33)'; ctx.font='9px JetBrains Mono,monospace'; ctx.textAlign='center';
+  const xS=Math.max(1,Math.ceil(totalDays/12));
+  for(let d=0;d<=Math.ceil(totalDays);d+=xS){
+    const x=pad.l+Math.min(d,totalDays)*scX;
+    ctx.fillText('H'+d,x,pad.t+gh+14);
+    ctx.beginPath();ctx.moveTo(x,pad.t+gh);ctx.lineTo(x,pad.t+gh+4);ctx.strokeStyle='rgba(255,255,255,.1)';ctx.lineWidth=1;ctx.stroke();
+  }
+
+  // End line (Makespan)
+  const ex = pad.l + totalDays * scX;
+  ctx.beginPath();ctx.moveTo(ex,pad.t);ctx.lineTo(ex,pad.t+gh);
+  ctx.strokeStyle='rgba(251,191,36,.55)'; ctx.lineWidth=1.5; ctx.setLineDash([4,3]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='#fbbf24'; ctx.font='bold 9px JetBrains Mono,monospace'; ctx.textAlign='right';
+  ctx.fillText('MAKESPAN: '+totalDays.toFixed(1)+' Hari', ex-2, pad.t-5);
+}
+
+function drawCumExact(schedule, totalProfit){
+  const cvs = document.getElementById('cumCanvas');
+  if(!cvs) return;
+  const ctx = cvs.getContext('2d');
+  const W=cvs.width, H=cvs.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#111827'; ctx.fillRect(0,0,W,H);
+
+  const pad={l:62,r:20,t:16,b:34};
+  const gw=W-pad.l-pad.r, gh=H-pad.t-pad.b;
+
+  // Extract events (when jobs finish M2)
+  let events = schedule.map(job => ({ t: job.m2_e, dp: job.p, type: job.type }));
+  events.sort((a,b)=>a.t-b.t);
+
+  const maxT = events[events.length-1].t;
+  const maxP = totalProfit * 1.05;
+
+  // Y Grid
+  ctx.strokeStyle='rgba(255,255,255,.04)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=pad.t+(i/4)*gh;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gw,y);ctx.stroke();}
+
+  let cum = 0;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t+gh);
+  events.forEach(ev => {
+    const x = pad.l+(ev.t/maxT)*gw;
+    const y1 = pad.t+gh-(cum/maxP)*gh;
+    const y2 = pad.t+gh-((cum+ev.dp)/maxP)*gh;
+    ctx.lineTo(x, y1); 
+    ctx.lineTo(x, y2);
+    cum += ev.dp;
+  });
+  ctx.lineTo(pad.l+gw, pad.t+gh-(cum/maxP)*gh);
+  ctx.lineTo(pad.l+gw, pad.t+gh);
+  ctx.closePath();
+  
+  const g=ctx.createLinearGradient(0,pad.t,0,pad.t+gh);
+  g.addColorStop(0,'rgba(0,212,170,.2)'); g.addColorStop(1,'rgba(0,212,170,.01)');
+  ctx.fillStyle=g; ctx.fill();
+
+  // Step Line
+  cum=0;
+  ctx.beginPath(); ctx.moveTo(pad.l,pad.t+gh);
+  events.forEach(ev=>{
+    const x=pad.l+(ev.t/maxT)*gw;
+    ctx.lineTo(x,pad.t+gh-(cum/maxP)*gh);
+    cum += ev.dp;
+    ctx.lineTo(x,pad.t+gh-(cum/maxP)*gh);
+  });
+  ctx.strokeStyle='rgba(0,212,170,.7)'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Dots
+  cum=0;
+  const skipDot = Math.max(1, Math.floor(events.length/25));
+  events.forEach((ev,i)=>{
+    cum+=ev.dp;
+    if(i%skipDot!==0 && i!==events.length-1) return;
+    const x=pad.l+(ev.t/maxT)*gw;
+    const y=pad.t+gh-(cum/maxP)*gh;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle = ev.type==='car' ? '#00d4aa' : '#fbbf24';
+    ctx.fill();
+  });
+
+  // Y labels
+  ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='9px JetBrains Mono,monospace'; ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const v=maxP*(i/4);const y=pad.t+gh-(i/4)*gh;ctx.fillText('$'+(v/1000).toFixed(0)+'k',pad.l-4,y+3);}
+  // X labels
+  ctx.textAlign='center';
+  const xS=Math.max(1,Math.floor(maxT/10));
+  for(let d=0;d<=Math.ceil(maxT);d+=xS){const x=pad.l+(Math.min(d,maxT)/maxT)*gw;ctx.fillText('H'+d,x,pad.t+gh+22);}
+  // Axes
+  ctx.strokeStyle='rgba(255,255,255,.17)'; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gh);ctx.moveTo(pad.l,pad.t+gh);ctx.lineTo(pad.l+gw,pad.t+gh);ctx.stroke();
+  
+  // Total Label
+  const epx=pad.l+gw, epy=pad.t+gh-(totalProfit/maxP)*gh;
+  ctx.beginPath();ctx.arc(epx,epy,5,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();
+  ctx.fillStyle='#fbbf24';ctx.font='bold 10px JetBrains Mono,monospace';ctx.textAlign='right';
+  ctx.fillText('$'+totalProfit.toLocaleString(),epx-8,epy-6);
+}
+
+// INIT
+buildPresets();
+renderSx();
+window.addEventListener('load',()=>setTimeout(()=>{
+  setMode(1);
+  drawMainG();
+  updSens();
+  
+  // Set default ke Optimal (0 Truk) saat pertama kali buka tab
+  document.getElementById('jTruckSlider').value = 0;
+  document.querySelectorAll('.preset-chip')[0].classList.add('active');
+  updJ();
+},100));
+</script>
+</body>
+</html>
